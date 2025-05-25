@@ -1,6 +1,5 @@
 #! /usr/bin/python3
 import sys,os,subprocess,json
-delim = '--'
 ignore_dirs = {
     '.archive',
     '.store',
@@ -20,15 +19,17 @@ def nl_input(*prompts):
     s = ''
     while s=='': s = input(*prompts).strip()
     return s
-    
-def get_field(*prompts,default=None):
+
+def get_or_input(*prompts):
+    if len(fields):
+        return fields.pop()
+    return nl_input(*prompts)
+
+def get_or_default(default):
     global fields
     if len(fields):
         return fields.pop()
-    elif default!=None:
-        return default
-    else:
-        return nl_input(*prompts)
+    return default
     
 def read_state():
     with open('.cfd','r') as f:
@@ -50,35 +51,30 @@ def clear_uc(state):
     print(*dirs)
     subprocess.run(['rm']+dirs)
     return True
-    
+
 def store_uc(state):
     path = '.store/'+state['name']
-    while os.path.exists(path):
+    if os.path.exists(path):
         print('Entry with name \''+path+'\' already exists')
-        r = nl_input('Rename[r] or abort[_] : ')
-        if r=='r':
-            state['name'] = nl_input('')
-        else:
-            return False
-    write_state(state)
-    dirs = [d for d in os.listdir('.') if d not in ignore_dirs]
-    subprocess.run(['mkdir',path])
-    subprocess.run(['mv']+dirs+[path])
-    return True
-    
-def try_make_active():
+        return False
+    else: 
+        dirs = [d for d in os.listdir('.') if d not in ignore_dirs]
+        subprocess.run(['mkdir',path])
+        subprocess.run(['mv']+dirs+[path])
+        return True
+        
+def check_active():
     if os.path.exists('.cfd'):
         return read_state()
     else:
         print('Currently not working on anything')
-        # could prompt to create new task instead or extract
         return None
         
 def try_make_inactive():
     if os.path.exists('.cfd'):
         state = read_state()
         print('Already working on \''+state['name']+'\'')
-        r = nl_input('Clear[c] or store[s] or abort[_] : ')
+        r = nl_input('Clear[c] or Store[s] or Abort[_] : ')
         if r=='c':
             return clear_uc(state)
         elif r=='s':
@@ -90,29 +86,75 @@ def try_make_inactive():
 def new():
     if not try_make_inactive(): return
     state = {}
-    state['name'] = get_field('Name of task : ')
-    lang_name = get_field('Language [py|cpp|..] : ')
-    state['ansfile'] = get_field(default='ans.'+lang_name)
+    state['name'] = get_or_input('Name of task : ')
+    state['lang'] = get_or_input('Language [py|cpp|..] : ')
+    state['ansfile'] = get_or_default('ans.'+state['lang'])
     write_state(state)
-    if (lang:=get_lang(lang_name))!=None:
+    subprocess.run(['mkdir','tests'])
+    if (lang:=get_lang(state['lang']))!=None:
         subprocess.run(['cp',lang['template'],state['ansfile']])
     else:
-        with open(state['ansfile']) as _ : pass        
+        with open(state['ansfile'],'w') as _ : pass        
         
 @command
 def clear():
-    if (state:=try_make_active())==None : return
+    if (state:=check_active())==None : return
     clear_uc(state)
-        
+
+@command
+def set():
+    if (state:=check_active())==None : return
+    for field in fields:
+        attr,val = field.split('=')
+    write_state(state)
+    
 @command
 def store():
-    if (state:=try_make_active())==None : return
+    if (state:=check_active())==None : return
     store_uc(state)
+    
+@command
+def run():
+    if (state:=check_active())==None : return
+    lang = get_lang(state['lang'])
+    env = os.environ.copy()
+    env['ARGS'] = get_or_default('')
+    env['ANSFILE'] = state['ansfile']
+    result = subprocess.run(lang['comp-cmd'],shell=True,env=env)
+    if result.returncode!=0: return
+
+    tests = os.listdir('tests')
+    if len(tests)==0:
+        subprocess.run(lang['run-cmd'],env=env,shell=True)
+        subprocess.run(lang['clean-cmd'],env=env,shell=True)
+        return 
+    with open('.out.txt','w+') as off:
+        for test in tests:
+            with open('tests/'+test,'r') as iff:
+                print('-----------R---------------------R-----------')
+                subprocess.run(lang['run-cmd'],
+                               stdout=off, stdin=iff,
+                               env=env, shell=True)
+                off.seek(0)
+                print('-----------O---------------------O-----------')
+                print(off.read(),end='')
+                off.truncate()
+    subprocess.run(lang['clean-cmd'],env=env,shell=True)
+
+@command
+def archive():
+    if (state:=check_active())==None : return
+    entry = state['name']+'_'+state['ansfile']
+    if os.path.exists('.archive/'+entry):
+        print('Entry with name \''+entry+'\' already exists')
+    else:
+        subprocess.run(['mv',state['ansfile'],'.archive/'+entry])
+        clear_uc(state)
 
 @command
 def extract():
     if not try_make_inactive(): return
-    name = get_field('Name of entry to extract : ')
+    name = get_or_input('Name of entry to extract : ')
     path = '.store/'+name+'/'
     if os.path.exists(path):
         dirs = [path+dir for dir in os.listdir(path)]

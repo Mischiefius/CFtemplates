@@ -1,4 +1,5 @@
 {
   "name": "test",
+  "lang": "py",
   "ansfile": "ans.py"
 }
