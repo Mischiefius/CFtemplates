@@ -1,17 +1,20 @@
 #include "bits/stdc++.h"
+#include "bits/stdc++.h"
 using namespace std;
 
 using ll=long long;
 // #define endl '\n'; cout.flush()
 #define endl '\n'
 #ifdef LOCAL
-#include "./extras/tracer.h"
+#include "./tmpls/tracer.h"
 #else
 #define io_fast ios_base::sync_with_stdio(false);cin.tie(nullptr)
 #define trace(...) ;
 #define traceN(...) ;
 #define delim ;
+#define end ;
 #endif
+
 
 template<typename T> inline void read(T &var){ cin >> var;}
 template<typename T, typename... R> inline void read(T &var, R &...rest){ cin >> var; read(rest...);}
@@ -33,4 +36,5 @@ int main(){
     io_fast;
     int input(t);
     repeatN(t,delim;println(test()));
+    end
 } 

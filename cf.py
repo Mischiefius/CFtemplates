@@ -9,6 +9,7 @@ ignore_dirs = {
     'tmpls'
 }
 commands = {}
+dash = '-'*16
 
 def command(func):
     assert commands.get(func.__name__)==None
@@ -49,7 +50,9 @@ def clear_uc(state):
     dirs = [d for d in os.listdir('.') if d not in ignore_dirs]
     print('Deleting entries from task \''+state['name']+'\'')
     print(*dirs)
+    dirs.remove('tests')
     subprocess.run(['rm']+dirs)
+    subprocess.run(['rm','-r','tests'] )
     return True
 
 def store_uc(state):
@@ -97,6 +100,13 @@ def new():
         with open(state['ansfile'],'w') as _ : pass        
         
 @command
+def addtest():
+    if (_:=check_active())==None : return
+    n = len(os.listdir('tests'))
+    with open('tests/'+str(n+1)+'.txt','w') as f:
+        f.write(sys.stdin.read())
+    
+@command
 def clear():
     if (state:=check_active())==None : return
     clear_uc(state)
@@ -106,6 +116,9 @@ def set():
     if (state:=check_active())==None : return
     for field in fields:
         attr,val = field.split('=')
+        if state.get(attr)!=None and val!='':
+            print(attr,':',state[attr],'->',val)
+            state[attr] = val
     write_state(state)
     
 @command
@@ -124,21 +137,22 @@ def run():
     if result.returncode!=0: return
 
     tests = os.listdir('tests')
+    tests.sort()
     if len(tests)==0:
         subprocess.run(lang['run-cmd'],env=env,shell=True)
         subprocess.run(lang['clean-cmd'],env=env,shell=True)
         return 
     with open('.out.txt','w+') as off:
         for test in tests:
+            print(dash*2,test,dash*2)
             with open('tests/'+test,'r') as iff:
-                print('-----------R---------------------R-----------')
                 subprocess.run(lang['run-cmd'],
                                stdout=off, stdin=iff,
                                env=env, shell=True)
                 off.seek(0)
-                print('-----------O---------------------O-----------')
+                print(dash+'O'+dash*2+'O'+dash)
                 print(off.read(),end='')
-                off.truncate()
+                off.truncate(0)
     subprocess.run(lang['clean-cmd'],env=env,shell=True)
 
 @command
