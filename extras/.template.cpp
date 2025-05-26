@@ -6,7 +6,7 @@ using ll=long long;
 // #define endl '\n'; cout.flush()
 #define endl '\n'
 #ifdef LOCAL
-#include "./tmpls/tracer.h"
+#include "./extras/tracer.h"
 #else
 #define io_fast ios_base::sync_with_stdio(false);cin.tie(nullptr)
 #define trace(...) ;

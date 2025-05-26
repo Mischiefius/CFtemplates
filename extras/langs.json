@@ -1,14 +1,14 @@
 [
   {
     "name" : "cpp",
-    "template" : "tmpls/.template.cpp",
+    "template" : "extras/.template.cpp",
     "comp-cmd" : "g++ $ANSFILE -std=c++20 -Wall -Wextra -fsanitize=undefined,address -Wno-sign-compare -DLOCAL $ARGS",
     "run-cmd" : "time ./a.out ",
     "clean-cmd" : "rm a.out 2> /dev/null" 
   },
   {
     "name" : "py",
-    "template" : "tmpls/.template.py",
+    "template" : "extras/.template.py",
     "comp-cmd" : ":",
     "run-cmd" : "time python $ARGS $ANSFILE",
     "clean-cmd" : ":" 

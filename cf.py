@@ -6,7 +6,8 @@ ignore_dirs = {
     os.path.basename(__file__),
     '.git',
     '.gitignore',
-    'tmpls'
+    'extras',
+    'bits'
 }
 commands = {}
 dash = '-'*16
@@ -41,7 +42,7 @@ def write_state(state):
         json.dump(state,f,indent=2)
 
 def get_lang(target):
-    with open('tmpls/langs.json','r') as f:
+    with open('extras/langs.json','r') as f:
         for lang in json.load(f):
             if lang['name']==target: return lang
     return None
@@ -50,7 +51,7 @@ def clear_uc(state):
     dirs = [d for d in os.listdir('.') if d not in ignore_dirs]
     print('Deleting entries from task \''+state['name']+'\'')
     print(*dirs)
-    dirs.remove('tests')
+    if 'tests' in dirs : dirs.remove('tests')
     subprocess.run(['rm']+dirs)
     subprocess.run(['rm','-r','tests'] )
     return True
@@ -142,17 +143,14 @@ def run():
         subprocess.run(lang['run-cmd'],env=env,shell=True)
         subprocess.run(lang['clean-cmd'],env=env,shell=True)
         return 
-    with open('.out.txt','w+') as off:
-        for test in tests:
-            print(dash*2,test,dash*2)
-            with open('tests/'+test,'r') as iff:
-                subprocess.run(lang['run-cmd'],
-                               stdout=off, stdin=iff,
-                               env=env, shell=True)
-                off.seek(0)
-                print(dash+'O'+dash*2+'O'+dash)
-                print(off.read(),end='')
-                off.truncate(0)
+    for test in tests:
+        print(dash*2,test,dash*2)
+        with open('tests/'+test,'r') as iff:
+            result = subprocess.run(lang['run-cmd'],
+                           stdout=subprocess.PIPE, stdin=iff,
+                           env=env, shell=True)
+            print(dash,'O',dash*2,'O',dash)
+            print(result.stdout.decode('utf-8'),end='')
     subprocess.run(lang['clean-cmd'],env=env,shell=True)
 
 @command
@@ -187,3 +185,4 @@ if len(sys.argv)>=2 and sys.argv[1] in commands:
 else:
     print('wat?')
     # later
+    print(file=sys.stderr)
