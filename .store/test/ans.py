@@ -12,7 +12,8 @@ def __separator():
 def __trace(*args,**kwargs):
     print(*args,sep=', ',end=' |#| ',file=sys.stderr)
     for name,val in kwargs.items():
-        print(name,'=',val,end=' | \n',file=sys.stderr)
+        print(name,'=',val,end=' | ',file=sys.stderr)
+    print(file=sys.stderr)
 if sys.platform == 'linux':
     trace = __trace;separator = __separator
     end = __end

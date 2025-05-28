@@ -10,6 +10,7 @@ def hash(x):
     x = x ^ (x >> 31)
     x &= 0xFFFFFFFFFFFFFFFF
     return x
+
 def wrap(cls):
     class inner(cls):
         def __hash__(self):

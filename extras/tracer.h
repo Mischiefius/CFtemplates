@@ -4,101 +4,105 @@
 //--------------------debug only---------------------//
 #undef endl
 #define io_fast ;
-#define trace(vars...) ;errprintall(__LINE__, #vars,vars);
+#define trace(vars...) ;errtraceall(__LINE__, #vars,vars);
 #define traceN(_n,expr);{ cerr<<":"<<__LINE__<<" | "<<#expr<<" = [";\
-int j=0;for(;j<(_n)-1;j++){cerr<<expr<<", ";cerr.flush();}if ((_n)!=0)cerr<<expr;cerr<<']'<<endl;}
+bool s = true;for(int j=0;j<_n;j++){if (!s) cerr << ", "; errprint(expr);s=false;}cerr<<']'<<<endl;
 
-#define delim ;cerr <<"---------------- "<<j+1<<" ---------------- "<<j+1<<" ----------------"<<endl;
-#define end ; cerr << "---------------- R -------------------------------- R ----------------" << endl; 
-template<typename T>
-ostream& operator << (ostream& in,const vector<T>& v){
-    in << '[';
-    for (int i=0; i+1 < v.size();i++) {
-        in << v[i] << ", ";
-        in.flush();
-    }
-    if (v.size()) in << v.back();
-    in << ']';
-    in.flush();
-    return in;
-}
+#define delim ; cerr <<"---------------- "<<j+1<<" ---------------- "<<j+1<<" ----------------"<< endl;
+#define endd ; cerr << "---------------- R -------------------------------- R ----------------" << endl; 
 
 template<typename T>
-ostream& operator << (ostream& in,const set<T>& s){
-    in << '{';
-    for(auto it = s.begin();it!=s.end();){
-        in << *(it++);
-        if (it!=s.end()) in << ", ";
-    }
-    in << '}';
-    return in;
-}
+concept Streamable = !is_bounded_array_v<T> && 
+        requires(ostream& os, T value) {
+        { os << value } -> same_as<ostream&>;
+};
+    
 template<typename T>
-ostream& operator << (ostream& in,const multiset<T>& s){
-    in << '{';
-    for(auto it = s.begin();it!=s.end();){
-        in << *(it++);
-        if (it!=s.end()) in << ", ";
+concept arrayLike = is_bounded_array_v<T> ||
+    ( ranges::range<T> && 
+    requires (T v, typename T::size_type i){
+        { v[i] } -> same_as<typename T::reference>;
+});
+
+template<typename T>
+concept setLike = 
+    ranges::range<T> && 
+    requires {
+    typename T::key_type;
+    typename T::value_type;
+};
+
+template<typename T>
+concept iterOpaque = 
+    (!(setLike<T> || arrayLike<T>)) &&
+    ranges::range<T>;
+
+template <Streamable T>
+void errprint(const T& var);
+template<typename ...T>
+void errprint (const tuple<T...>& t);
+template<typename T1, typename T2>
+void errprint(const pair<T1,T2>& p);
+template <ranges::range R>
+void _printrange(const R& r);
+template<setLike S>
+void errprint(const S& var);
+template<arrayLike V>
+void errprint(const V& var);
+template<iterOpaque O>
+void errprint(const O& var);
+
+template <ranges::range R>
+void _printrange(const R& r){
+    bool start = true;
+    for (auto& v : r){
+        if (!start) cerr << ", ";
+        start = false;
+        errprint(v);
     }
-    in << '}';
-    return in;
-}
-template<typename T, typename H>
-ostream& operator << (ostream& in,const unordered_set<T,H>& s){
-    in << '{';
-    for(auto it = s.begin();it!=s.end();){
-        in << *(it++);
-        if (it!=s.end()) in << ", ";
-    }
-    in << '}';
-    return in;
-}
-template<typename T, typename H>
-ostream& operator << (ostream& in,const unordered_multiset<T,H>& s){
-    in << '{';
-    for(auto it = s.begin();it!=s.end();){
-        in << *(it++);
-        if (it!=s.end()) in << ", ";
-    }
-    in << '}';
-    return in;
-}
-template<typename K,typename V>
-ostream& operator << (ostream& in,const map<K,V>& s){
-    in << '{';
-    auto it = s.begin();
-    for(;next(it)!=s.end(); it++){
-        in << it->first << ':' << it->second << ", ";
-    }
-    in << it->first << ':' << it->second << '}';
-    return in;
 }
 
-template<typename K,typename V,typename H>
-ostream& operator << (ostream& in,const unordered_map<K,V,H>& s){
-    in << '{';
-    auto it = s.begin();
-    for(;next(it)!=s.end(); it++){
-        in << it->first << ':' << it->second << ", ";
-    }
-    in << it->first << ':' << it->second << '}';
-    return in;
-}
-
-template<typename T,typename R>
-ostream& operator << (ostream& in,const pair<T,R>& s){
-    in << '(' << s.first <<',' << s.second << ')'; 
-    return in;
-}
 template<typename T,size_t... I>
-void __print_tup(const T& t,std::index_sequence<I...>){
-    (..., (cerr << (I == 0? "" : ", ") << get<I>(t)));
+void _print_tup(const T& t, index_sequence<I...>){
+    (...,(cerr<<(I == 0? "" : ", "),errprint(get<I>(t))));
 }
 template<typename ...T>
-ostream& operator << (ostream& in,const tuple<T...>& t){
-    in << '(';
-    __print_tup(t,make_index_sequence<sizeof...(T)>());
-    return in << ')';
+void errprint (const tuple<T...>& t){
+    cerr << '(';
+    _print_tup(t,make_index_sequence<sizeof...(T)>());
+    cerr << ')';
+}
+
+template<typename T1, typename T2>
+void errprint(const pair<T1,T2>& p){
+    cerr <<'<';
+    errprint(p.first);
+    cerr <<' ';
+    errprint(p.second);
+    cerr <<'>';
+}
+
+template <Streamable T>
+void errprint(const T& var){
+    cerr << var;
+}
+template<setLike S>
+void errprint(const S& s){
+    cerr << '{';
+    _printrange(s);
+    cerr << '}';
+}
+
+template<arrayLike V>
+void errprint(const V& s){
+    cerr << '[';
+    _printrange(s);
+    cerr << ']';
+}
+template<iterOpaque O>
+void errprint(const O& s){
+    cerr << "# ";
+    _printrange(s);
 }
 
 struct StrSplit{
@@ -111,23 +115,10 @@ struct StrSplit{
         return string(start,n);
     }
 };
-template <typename T>
-void errprint(const string&& name, T& var ){
-    cerr << " | " <<name << " = " << var;
-    cerr.flush();
-}
 template <typename... T>
-void errprintall(int lno,const char* s, const T&... vars){
+void errtraceall(int lno,const char* s, const T&... vars){
     cerr <<":"<<lno;
     auto names = StrSplit(s);
-    (...,errprint(move(names.next()),vars));
+    (...,(cerr<<" | "<<names.next()<<" = ",errprint(vars)));
     cerr << endl;
 }
-// int main(){
-//     int a,b,c;
-//     int x[5] = {0};
-//     set<int> f = {5,10};
-//     traceI(f,e);
-//     traceN(5,x);
-//     trace(a,b,c);
-// }
