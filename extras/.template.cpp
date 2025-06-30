@@ -32,6 +32,6 @@ int test(){
 int main(){
     io_fast;
     int input(t);
-    rep(_,t) {delim;println(test());};
+    rep(j,t) {delim;println(test());};
     endd;
 } 

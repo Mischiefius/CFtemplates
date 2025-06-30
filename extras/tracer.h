@@ -1,12 +1,12 @@
-//--------------------debug only---------------------//
-// #include <bits/stdc++.h>
-// using namespace std;
-//--------------------debug only---------------------//
+// //--------------------debug only---------------------//
+//  #include <bits/stdc++.h>
+//  using namespace std;
+// //--------------------debug only---------------------//
 #undef endl
 #define io_fast 
 #define trace(vars...) ;errtraceall(__LINE__, #vars,vars);
 #define traceN(_n,expr);{ cerr<<":"<<__LINE__<<" | "<<#expr<<" = [";\
-bool s = true;for(int j=0;j<_n;j++){if (!s) cerr << ", "; errprint(expr);s=false;}cerr<<']'<<endl;}
+for(int j=0;j<_n;j++){ cerr << ((j==0) ? "" : ", "); errprint(expr);}cerr<<']'<<endl;}
 
 #define delim ; cerr <<"---------------- "<<j+1<<" ---------------- "<<j+1<<" ----------------"<< endl;
 #define endd ; cerr << "---------------- R -------------------------------- R ----------------" << endl; 
@@ -14,18 +14,24 @@ bool s = true;for(int j=0;j<_n;j++){if (!s) cerr << ", "; errprint(expr);s=false
 template<typename... T> void err(const T&... vars) {(...,(cerr << vars << ' '));}
 template<typename... T> void errln(const T&... vars) {err(vars...);cout << endl;}
 
+// Dynamic strings `char s[n]` must be traced like trace(&s[0])
+// because char[n] cannot be passed as a template parameter. 
+
 template<typename T>
-concept Streamable = !is_bounded_array_v<T> && 
-        requires(ostream& os, T value) {
-        { os << value } -> same_as<ostream&>;
-};
-    
+concept stringLike = is_convertible_v<T,string_view>;
+
 template<typename T>
-concept arrayLike = is_bounded_array_v<T> ||
+concept arrayLike = (is_bounded_array_v<T> ||
     ( ranges::range<T> && 
     requires (T v, typename T::size_type i){
         { v[i] } -> same_as<typename T::reference>;
-});
+    })) && !stringLike<T>;
+
+template<typename T>
+concept Streamable = !arrayLike<T>  && !is_same_v<T,bool> && 
+        requires(ostream& os, T value) {
+        { os << value } -> same_as<ostream&>;
+};
 
 template<typename T>
 concept setLike = 
@@ -37,11 +43,12 @@ concept setLike =
 
 template<typename T>
 concept iterOpaque = 
-    (!(setLike<T> || arrayLike<T>)) &&
+    (!(setLike<T> || arrayLike<T> || stringLike<T>)) &&
     ranges::range<T>;
 
 template <Streamable T>
 void errprint(const T& var);
+void errprint(const bool& var);
 template<typename ...T>
 void errprint (const tuple<T...>& t);
 template<typename T1, typename T2>
@@ -69,6 +76,7 @@ template<typename T,size_t... I>
 void _print_tup(const T& t, index_sequence<I...>){
     (...,(cerr<<(I == 0? "" : ", "),errprint(get<I>(t))));
 }
+
 template<typename ...T>
 void errprint (const tuple<T...>& t){
     cerr << '(';
@@ -85,10 +93,15 @@ void errprint(const pair<T1,T2>& p){
     cerr <<'>';
 }
 
+void errprint(const bool& var){
+    cerr << (var? 'T' : 'F'); 
+}
+
 template <Streamable T>
 void errprint(const T& var){
     cerr << var;
 }
+
 template<setLike S>
 void errprint(const S& s){
     cerr << '{';
@@ -102,6 +115,7 @@ void errprint(const V& s){
     _printrange(s);
     cerr << ']';
 }
+
 template<iterOpaque O>
 void errprint(const O& s){
     cerr << "# ";
@@ -118,9 +132,10 @@ struct StrSplit{
         return string(start,n);
     }
 };
+
 template <typename... T>
 void errtraceall(int lno,const char* s, const T&... vars){
-    cerr <<":"<<lno;
+    cerr <<lno<<":";
     auto names = StrSplit(s);
     (...,(cerr<<" | "<<names.next()<<" = ",errprint(vars)));
     cerr << endl;
