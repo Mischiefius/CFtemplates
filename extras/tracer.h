@@ -1,11 +1,11 @@
 // //--------------------debug only---------------------//
-//  #include <bits/stdc++.h>
-//  using namespace std;
+// #include <bits/stdc++.h>
+// using namespace std;
 // //--------------------debug only---------------------//
 #undef endl
 #define io_fast 
 #define trace(vars...) ;errtraceall(__LINE__, #vars,vars);
-#define traceN(_n,expr);{ cerr<<":"<<__LINE__<<" | "<<#expr<<" = [";\
+#define traceN(_n,expr);{ cerr<<__LINE__<<":"<<" | "<<#expr<<" = [";\
 for(int j=0;j<_n;j++){ cerr << ((j==0) ? "" : ", "); errprint(expr);}cerr<<']'<<endl;}
 
 #define delim ; cerr <<"---------------- "<<j+1<<" ---------------- "<<j+1<<" ----------------"<< endl;
@@ -46,16 +46,14 @@ concept iterOpaque =
     (!(setLike<T> || arrayLike<T> || stringLike<T>)) &&
     ranges::range<T>;
 
+void errprint(const bool& var);
 template <Streamable T>
 void errprint(const T& var);
-void errprint(const bool& var);
 template<typename ...T>
 void errprint (const tuple<T...>& t);
 template<typename T1, typename T2>
 void errprint(const pair<T1,T2>& p);
 template <ranges::range R>
-void _printrange(const R& r);
-template<setLike S>
 void errprint(const S& var);
 template<arrayLike V>
 void errprint(const V& var);
