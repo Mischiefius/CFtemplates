@@ -165,10 +165,10 @@ def archive():
 
 @command
 def extract():
-    if not try_make_inactive(): return
     name = get_or_input('Name of entry to extract : ')
     path = '.store/'+name+'/'
     if os.path.exists(path):
+        if not try_make_inactive(): return
         dirs = [path+dir for dir in os.listdir(path)]
         subprocess.run(['mv']+dirs+['./'])
         subprocess.run(['rmdir',path])

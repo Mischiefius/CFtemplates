@@ -3,13 +3,16 @@
 // using namespace std;
 //--------------------debug only---------------------//
 #undef endl
-#define io_fast ;
+#define io_fast 
 #define trace(vars...) ;errtraceall(__LINE__, #vars,vars);
 #define traceN(_n,expr);{ cerr<<":"<<__LINE__<<" | "<<#expr<<" = [";\
-bool s = true;for(int j=0;j<_n;j++){if (!s) cerr << ", "; errprint(expr);s=false;}cerr<<']'<<<endl;
+bool s = true;for(int j=0;j<_n;j++){if (!s) cerr << ", "; errprint(expr);s=false;}cerr<<']'<<endl;}
 
 #define delim ; cerr <<"---------------- "<<j+1<<" ---------------- "<<j+1<<" ----------------"<< endl;
 #define endd ; cerr << "---------------- R -------------------------------- R ----------------" << endl; 
+#define local if (true)
+template<typename... T> void err(const T&... vars) {(...,(cerr << vars << ' '));}
+template<typename... T> void errln(const T&... vars) {err(vars...);cout << endl;}
 
 template<typename T>
 concept Streamable = !is_bounded_array_v<T> && 
