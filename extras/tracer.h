@@ -53,7 +53,7 @@ template<typename ...T>
 void errprint (const tuple<T...>& t);
 template<typename T1, typename T2>
 void errprint(const pair<T1,T2>& p);
-template <ranges::range R>
+template <typename S>
 void errprint(const S& var);
 template<arrayLike V>
 void errprint(const V& var);

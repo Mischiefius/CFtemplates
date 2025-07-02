@@ -1,3 +1,4 @@
 bits/
 .archive
 .store
+.clangd
