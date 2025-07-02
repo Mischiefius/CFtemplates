@@ -1,12 +1,15 @@
 #! /usr/bin/python3
 import sys,os,subprocess,json
-ignore_dirs = {
+required_dirs = {
     '.archive',
     '.store',
+    'extras'
+}
+ignore_dirs = {
     os.path.basename(__file__),
     '.git',
     '.gitignore',
-    'extras',
+    '.clangd',
     'bits'
 }
 commands = {}
@@ -176,8 +179,9 @@ def extract():
         print('No entry with name \''+name+'\' in store')
     
 #---------------------------entry_point---------------------------#
-for dir in ignore_dirs:
+for dir in required_dirs:
     assert os.path.exists(dir)
+ignore_dirs.update(required_dirs)
 
 if len(sys.argv)>=2 and sys.argv[1] in commands:
     fields = sys.argv[2:][::-1]

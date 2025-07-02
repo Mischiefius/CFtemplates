@@ -1,7 +1,7 @@
-// //--------------------debug only---------------------//
+//--------------------debug only---------------------//
 // #include <bits/stdc++.h>
 // using namespace std;
-// //--------------------debug only---------------------//
+//--------------------debug only---------------------//
 #undef endl
 #define io_fast 
 #define trace(vars...) ;errtraceall(__LINE__, #vars,vars);
@@ -53,7 +53,7 @@ template<typename ...T>
 void errprint (const tuple<T...>& t);
 template<typename T1, typename T2>
 void errprint(const pair<T1,T2>& p);
-template <typename S>
+template <setLike S>
 void errprint(const S& var);
 template<arrayLike V>
 void errprint(const V& var);

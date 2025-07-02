@@ -72,7 +72,8 @@ struct segTree{
     unique_ptr<T[]> tree;
     T ans;
     int b,n;
-    segTree(int* first, int size){
+    template<class Iterator>
+    segTree(Iterator first, int size){
         n = size;
         b = 1;
         while (b<n) b *=2; 
