@@ -31,7 +31,7 @@ struct Rhash{
         return (((size_t) rd())<<32) | ((size_t) rd());
     }
     
-    size_t operator()(const T key) const {
+    size_t operator()(const T& key) const {
         static const auto hsh = hash<T>();
         static const size_t fr = size_t_random();
         size_t x = hsh(key);
