@@ -1,6 +1,6 @@
 #ifdef LOCAL
-#include "./extras/.tracer.h"
 #include "./extras/.stdc++.h"
+#include "./extras/.tracer.h"
 #else
 #include <bits/stdc++.h>
 #define io_fast ios_base::sync_with_stdio(false);cin.tie(nullptr)
