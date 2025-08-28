@@ -1,4 +1,4 @@
-bits
+extras/.stdc++.h*
 .archive
 .store
 .clangd

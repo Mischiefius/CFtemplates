@@ -1,12 +1,8 @@
-#include "bits/stdc++.h"
-using namespace std;
- 
-using ll=long long;
-// #define endl '\n'; cout.flush()
-#define endl '\n'
 #ifdef LOCAL
-#include "./extras/tracer.h"
+#include "./extras/.tracer.h"
+#include "./extras/.stdc++.h"
 #else
+#include <bits/stdc++.h>
 #define io_fast ios_base::sync_with_stdio(false);cin.tie(nullptr)
 #define trace(...) 
 #define traceN(...) 
@@ -16,7 +12,11 @@ using ll=long long;
 #define delim 
 #define endd 
 #endif
- 
+using ll=long long;
+using namespace std;
+// #define endl '\n'; cout.flush()
+#define endl '\n'
+
 template<typename... T> void read(T&... vars) {(cin >>...>> vars);}
 #define input(vars...) vars; read(vars)
 #define rep(v,_n) for (int v=0;v<_n;v++)   
@@ -31,7 +31,7 @@ int test(){
 
 int main(){
     io_fast;
-    int input(t);
-    rep(j,t) {delim;println(test());};
+    int input(_t);
+    rep(j,_t) {delim;println(test());};
     endd;
 } 

@@ -1,6 +1,5 @@
 //--------------------debug only---------------------//
-// #include <bits/stdc++.h>
-// using namespace std;
+using namespace std;
 //--------------------debug only---------------------//
 #undef endl
 #define io_fast 

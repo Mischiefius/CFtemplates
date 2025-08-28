@@ -10,7 +10,6 @@ ignore_dirs = {
     '.git',
     '.gitignore',
     '.clangd',
-    'bits'
 }
 commands = {}
 dash = '-'*16
@@ -182,6 +181,7 @@ def extract():
 #---------------------------entry_point---------------------------#
 for dir in required_dirs:
     assert os.path.exists(dir)
+
 ignore_dirs.update(required_dirs)
 
 if len(sys.argv)>=2 and sys.argv[1] in commands:
