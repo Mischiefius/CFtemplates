@@ -11,11 +11,10 @@
 #define local if (false)
 #define delim 
 #define endd 
+#define endl '\n'
 #endif
 using ll=long long;
 using namespace std;
-// #define endl '\n'; cout.flush()
-#define endl '\n'
 
 template<typename... T> void read(T&... vars) {(cin >>...>> vars);}
 #define input(vars...) vars; read(vars)

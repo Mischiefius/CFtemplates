@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-
+using ll = long long;
 
 //-----------------------DSU-----------------------// 20
 struct DSU{
@@ -22,6 +22,14 @@ struct DSU{
         return 1;
     }
 };
+
+//-----------------------MMI-----------------------// 3
+
+const ll mod = 1000000007;
+ll inv(ll a) {
+  if (a==0) throw runtime_error("Inverse of 0 encountered");
+  return a <= 1 ? a : mod - (mod/a) * inv(mod % a) % mod;
+}
 
 //----------------------hash----------------------// 19
 template<typename T>
@@ -63,7 +71,6 @@ struct trie{
         for (int i=0;i<10;i++) if(nexts[i]) delete nexts[i];
     }
 };
-
 
 //----------------------segTree----------------------// 46
 template <typename T, void cmb(T&, const T&, const T&),

@@ -14,10 +14,13 @@ ignore_dirs = {
 commands = {}
 dash = '-'*16
 
-def command(func):
-    assert commands.get(func.__name__)==None
-    commands[func.__name__] = func
-    return func
+def command(helptext=""):
+    def wrap(func):
+        func.helptext = helptext
+        assert commands.get(func.__name__) is None
+        commands[func.__name__] = func
+        return func
+    return wrap
 
 def nl_input(*prompts):
     s = ''
@@ -88,8 +91,13 @@ def try_make_inactive():
         else : return False
     else : return True
 
-@command
+@command("new [name] [lang] [ansfile]")
 def new():
+    """
+    Start a new task. Creates a 'tests/' directory, and an
+    answer file from the language template (or empty if none).
+    If another task is active, prompts to clear/store/abort first.
+    """
     if not try_make_inactive(): return
     state = {}
     state['name'] = get_or_input('Name of task : ')
@@ -101,22 +109,34 @@ def new():
         subprocess.run(['cp',lang['template'],state['ansfile']])
     else:
         with open(state['ansfile'],'w') as _ : pass        
-        
-@command
+
+@command("addtest")
 def addtest():
+    """
+    Reads input from stdin and saves it as a new numbered test case
+    in 'tests/'. File is named <n>.txt.
+    """
     if (_:=check_active())==None : return
     n = len(os.listdir('tests'))
     test = sys.stdin.read()
     with open('tests/'+str(n+1)+'.txt','w') as f:
         f.write(test)
-    
-@command
+
+@command("clear")
 def clear():
+    """
+    Clears the current task, if currently working on one.
+    Deletes all files and directories of the current task.
+    """
     if (state:=check_active())==None : return
     clear_uc(state)
 
-@command
+@command("set attr=val ...")
 def set():
+    """
+    Update fields in the current task’s state (.cfd).
+    Example: set ansfile=main.cpp
+    """
     if (state:=check_active())==None : return
     for field in fields:
         attr,val = field.split('=')
@@ -124,14 +144,23 @@ def set():
             print(attr,':',state[attr],'->',val)
             state[attr] = val
     write_state(state)
-    
-@command
+
+@command("store")
 def store():
+    """
+    Moves the current task’s files into '.store/<taskname>/'
+    and marks it inactive. Useful for pausing a task.
+    """
     if (state:=check_active())==None : return
     store_uc(state)
-    
-@command
+
+@command("run [args]")
 def run():
+    """
+    Compiles (if needed) and runs the answer file using the
+    language commands from extras/langs.json. Runs against all
+    tests in 'tests/' if present, or directly otherwise.
+    """
     if (state:=check_active())==None : return
     lang = get_lang(state['lang'])
     env = os.environ.copy()
@@ -156,8 +185,12 @@ def run():
             print(result.stdout.decode('utf-8'),end='')
     subprocess.run(lang['clean-cmd'],env=env,shell=True)
 
-@command
+@command("archive")
 def archive():
+    """
+    Moves the answer file into '.archive/' with a unique name
+    'taskname_ansfile' and clears the rest of the task’s files.
+    """
     if (state:=check_active())==None : return
     entry = state['name']+'_'+state['ansfile']
     if os.path.exists('.archive/'+entry):
@@ -166,8 +199,12 @@ def archive():
         subprocess.run(['mv',state['ansfile'],'.archive/'+entry])
         clear_uc(state)
 
-@command
+@command("extract [name]")
 def extract():
+    """
+    Restores a stored task from '.store/<name>/'.
+    If another task is active, prompts to clear/store/abort first.
+    """
     name = get_or_input('Name of entry to extract : ')
     path = '.store/'+name+'/'
     if os.path.exists(path):
@@ -177,7 +214,36 @@ def extract():
         subprocess.run(['rmdir',path])
     else:
         print('No entry with name \''+name+'\' in store')
-    
+
+@command("help [command] ...")
+def help():
+    """
+    Gee I wonder what this command does?
+    Optionally provide command names to see details only for those.
+    """
+    # ANSI colors
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+
+    print_commands = commands if not fields else {}
+    while fields:
+        cmd_name = fields.pop()
+        print_commands[cmd_name] = commands.get(cmd_name)
+
+    for name, func in sorted(print_commands.items()):
+        if func is None:
+            print(f"\n{YELLOW}No such command:{RESET} {CYAN}{name}{RESET}")
+            continue
+        usage = getattr(func, "helptext", "")
+        desc = func.__doc__.strip()
+        print(f"\n{CYAN}{name}{RESET}")
+        if usage:
+            print(f"  {GREEN}Usage:{RESET} {usage}")
+        for line in desc.splitlines():
+            print(f"    {line.lstrip()}")
+
 #---------------------------entry_point---------------------------#
 for dir in required_dirs:
     assert os.path.exists(dir)
@@ -188,5 +254,5 @@ if len(sys.argv)>=2 and sys.argv[1] in commands:
     fields = sys.argv[2:][::-1]
     commands[sys.argv[1]]()
 else:
-    print('wat?')
-    # later
+    print(f"\033[91mInvalid command : \033[0m\033[96m{sys.argv[1]}\033[0m")
+    print("Run '\033[96m./cf help\033[0m' to see the list of available commands.")
