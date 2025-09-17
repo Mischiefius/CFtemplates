@@ -6,8 +6,6 @@
 #define io_fast ios_base::sync_with_stdio(false);cin.tie(nullptr)
 #define trace(...) 
 #define traceN(...) 
-#define err(...) 
-#define errln(...) 
 #define local if (false)
 #define delim 
 #define endd 

@@ -80,12 +80,13 @@ struct segTree{
     unique_ptr<T[]> tree;
     T ans;
     int b,n;
-    template<class Iterator>
-    segTree(Iterator first, int size){
-        n = size;
+    segTree() {};
+    template<typename I>
+    segTree(I first, I last){
+        n = distance(first,last);
         b = 1;
         while (b<n) b *=2; 
-        tree = unique_ptr<T[]>(new T[2*n-1]-1);
+        tree = unique_ptr<T[]>(new T[2*n]);
         for(int i=0;i<n;i++) tree[n+(i+b)%n] = *(first++);
         for(int i=n-1;i>0;i--) 
             cmb(tree[i],tree[2*i],tree[2*i+1]);
@@ -116,9 +117,6 @@ struct segTree{
         }
         cmbq(ans,ql,qr);
     }
-    ~segTree(){if (T* w=tree.release()) delete[] (w+1);}
-    segTree(segTree&& o)noexcept =default;
-    segTree& operator=(segTree&& o)noexcept =default;
 };
 // root node not checked & l and r global vars; x=1,bs=b/2 (init)
 // void _query(int x, int lx,int rx,int bs){

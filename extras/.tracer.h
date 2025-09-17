@@ -10,8 +10,6 @@ for(int j=0;j<_n;j++){ cerr << ((j==0) ? "" : ", "); errprint(expr);}cerr<<']'<<
 #define delim ; cerr <<"---------------- "<<j+1<<" ---------------- "<<j+1<<" ----------------"<< endl;
 #define endd ; cerr << "---------------- R -------------------------------- R ----------------" << endl; 
 #define local if (true)
-template<typename... T> void err(const T&... vars) {(...,(cerr << vars << ' '));}
-template<typename... T> void errln(const T&... vars) {err(vars...);cout << endl;}
 
 // Dynamic strings `char s[n]` must be traced like trace(&s[0])
 // because char[n] cannot be passed as a template parameter. 
