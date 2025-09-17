@@ -1,4 +1,5 @@
-extras/.stdc++.h*
+extras/*.gch
+extras/.stdc++.h
 .archive
 .store
 .clangd

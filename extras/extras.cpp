@@ -2,7 +2,7 @@
 using namespace std;
 using ll = long long;
 
-//-----------------------DSU-----------------------// 20
+//-----------------------DSU-----------------------// 21
 struct DSU{
     vector<int> lnk;
     DSU(int n){
@@ -12,17 +12,18 @@ struct DSU{
         if (lnk[x] < 0) return x;
         return lnk[x] = find(lnk[x]);
     }
+    int size(int x){
+        return -lnk[find(x)];
+    }
     int unite(int x, int y){
         x = find(x); y = find(y);
         if (x==y) return 0;
 
-        if (lnk[x] == lnk[y]) {lnk[x]--;lnk[y] = x;}
-        else if (lnk[x] < lnk[y]) lnk[y] = x;
-        else lnk[x] = y;
+        if (lnk[x] > lnk[y]) {lnk[y] += lnk[x];lnk[x] = y;}
+        else {lnk[x] += lnk[y];lnk[y] = x;}
         return 1;
     }
 };
-
 //-----------------------MMI-----------------------// 3
 
 const ll mod = 1000000007;
