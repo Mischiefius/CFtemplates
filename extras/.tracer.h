@@ -66,7 +66,7 @@ void errprint(const O& var);
 template <ranges::range R>
 void _printrange(const R& r){
     bool start = true;
-    for (auto& v : r){
+    for (const auto& v : r){
         if (!start) cerr << ", ";
         start = false;
         errprint(v);
@@ -88,14 +88,15 @@ void errprint (const tuple<T...>& t){
 template<typename T>
 void errprint(const optional<T>& v) {
     if (v) {cerr << '?' ;errprint(*v);}
-    else cerr << "?-";
+    else cerr << "?~";
 }
 
 template<typename... Ts>
 void errprint(const variant<Ts...>& v) {
+    cerr  << '!';
+    std::visit([](const auto& val){ errprint(val); }, v);
     size_t index = v.index();
-    cerr  << '!' << index << '~';
-    std::visit([](auto& val){ errprint(val); }, v);
+    cerr << '~' << index;
 }
 
 template<typename T1, typename T2>
@@ -137,9 +138,9 @@ void errprint(const V& s){
 
 template<iterOpaque O>
 void errprint(const O& s){
-    cerr << '`';
+    cerr << '/';
     _printrange(s);
-    cerr << '`';
+    cerr << '\\';
 }
 
 struct StrSplit{
@@ -152,6 +153,23 @@ struct StrSplit{
         return string(start,n);
     }
 };
+
+#define _MERGE(a, b) a##b
+#define traceS(vars...) traceS_inner(__COUNTER__,vars)
+#define traceS_inner(ID,vars...) \
+void _MERGE(_print_,ID) () const {_err_print_struct(#vars,vars);}\
+friend void errprint(const auto& arg){arg._MERGE(_print_,ID) ();}
+
+template <typename T1, typename... T>
+void _err_print_struct(const char*s, const T1& var,const T&... vars){
+    cerr <<"{";
+    auto names = StrSplit(s);
+    cerr << names.next()<< " = ";
+    errprint(var);
+    (...,(cerr<<", "<<names.next()<<" = ",errprint(vars)));
+    cerr <<"}";
+    
+}
 
 template <typename... T>
 void errtraceall(int lno,const char* s, const T&... vars){

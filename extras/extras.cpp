@@ -73,7 +73,7 @@ struct trie{
     }
 };
 
-//----------------------segTree----------------------// 46
+//----------------------segTree----------------------// 45
 template <typename T, void cmb(T&, const T&, const T&),
           decltype(cmb) upd=cmb, decltype(cmb) cmbq=cmb>
 struct segTree{
@@ -81,9 +81,9 @@ struct segTree{
     T ans;
     int b,n;
     segTree() {};
-    template<typename I>
-    segTree(I first, I last){
-        n = distance(first,last);
+    template<input_iterator I1, sentinel_for<I1> I2>
+    segTree(I1 first, I2 last){
+        n = ranges::distance(first,last);
         b = 1;
         while (b<n) b *=2; 
         tree = unique_ptr<T[]>(new T[2*n]);
